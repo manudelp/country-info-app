@@ -53,7 +53,7 @@ npm run dev
 
 ### Building for Production
 
-# To create a production build of the frontend, run:
+## To create a production build of the frontend, run:
 
 ```bash
 npm run build
@@ -61,11 +61,11 @@ npm run build
 
 ## Environment Variables
 
-# Backend
+### Backend
 
 - NAGER_API_BASE_URL: Base URL for the Nager API.
 - COUNTRIES_NOW_API_BASE_URL: Base URL for the Countries Now API.
 
-# Frontend
+### Frontend
 
 - NEXT_PUBLIC_BACKEND_URL: URL of the backend server.
