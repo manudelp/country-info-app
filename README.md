@@ -42,8 +42,9 @@ cd frontend
 2. Install dependencies:
 
 ```bash
-npm install
+npm install --legacy-peer-deps
 ```
+Note: The --legacy-peer-deps flag is necessary to bypass peer dependency conflicts that may arise due to version mismatches.
 
 3. Start the frontend server:
 
