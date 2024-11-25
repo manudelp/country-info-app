@@ -1,30 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { Line } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  LineElement,
-  PointElement,
-  CategoryScale,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
 import Loader from "../../components/loader";
-
-// Register ChartJS components
-ChartJS.register(
-  LineElement,
-  PointElement,
-  CategoryScale,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend
-);
+import Borders from "@/app/components/borders";
+import Population from "@/app/components/population";
 
 interface BorderCountry {
   commonName: string;
@@ -34,15 +13,10 @@ interface BorderCountry {
   borders: BorderCountry[] | null;
 }
 
-interface PopulationData {
-  year: number;
-  value: number;
-}
-
 interface CountryData {
   country: string;
   borders: BorderCountry[];
-  populationData: PopulationData[];
+  populationData: { year: number; value: number }[];
   flagUrl: string | null;
 }
 
@@ -84,7 +58,6 @@ export default function CountryInfoPage({
         }
         const data = await response.json();
         setCountryData(data);
-        console.log(data);
       } catch (error) {
         if (error instanceof Error) {
           setError(error.message);
@@ -100,90 +73,35 @@ export default function CountryInfoPage({
   }, [countryCode]);
 
   if (loading) return <Loader />;
-  if (error) return <div className="text-red-500">{error}</div>;
+  if (error)
+    return (
+      <div className="text-red-500 text-3xl w-full h-screen grid place-items-center">
+        {error}
+      </div>
+    );
 
   if (!countryData) return null;
-
   const { country, borders, populationData, flagUrl } = countryData;
-
-  // Prepare population chart data
-  const chartData = {
-    labels: populationData.map((data: { year: number }) => data.year), // Extract years
-    datasets: [
-      {
-        label: "Population",
-        data: populationData.map((data: { value: number }) => data.value), // Extract population values
-        borderColor: "rgba(75, 192, 192, 1)",
-        backgroundColor: "rgba(75, 192, 192, 0.2)",
-        tension: 0.4,
-      },
-    ],
-  };
-
-  // Chart options
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: { position: "top" as const },
-      title: { display: true, text: `Population of ${country}` },
-    },
-    scales: {
-      x: { title: { display: true, text: "Year" } },
-      y: { title: { display: true, text: "Population" } },
-    },
-  };
-
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-4xl font-bold text-center mb-6">{country}</h1>
-      <div className="flex justify-center mb-6">
+    <div className="container mx-auto p-4 md:p-6">
+      <h1 className="text-3xl md:text-4xl font-semibold text-center mb-6 text-white">
+        {country}
+      </h1>
+
+      <div className="flex justify-center mb-4">
         <Image
           priority
           src={flagUrl || "/flag-placeholder.svg"}
           alt={`${country} flag`}
-          className="w-32 h-auto rounded shadow-md"
+          className="w-24 h-auto sm:w-32 md:w-56"
           width={128}
           height={80}
         />
       </div>
 
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2">
-          Border Countries
-        </h2>
-        <div className="flex gap-2 mt-4">
-          {borders.length > 0 ? (
-            borders.map((border, index) => (
-              <Link
-                href={`/country/${border.countryCode}`}
-                key={index}
-                className="bg-gray-800 p-2 rounded-lg text-white"
-              >
-                {border.commonName}
-              </Link>
-            ))
-          ) : (
-            <div className="text-gray-500 italic">
-              No border countries available
-            </div>
-          )}
-        </div>
-      </div>
+      <Borders borders={borders} />
 
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2">
-          Population Chart
-        </h2>
-        {populationData.length > 0 ? (
-          <div className="bg-white p-4 rounded shadow-md">
-            <Line data={chartData} options={chartOptions} />
-          </div>
-        ) : (
-          <div className="text-gray-500 italic mt-4">
-            No population data available
-          </div>
-        )}
-      </div>
+      <Population populationData={populationData} country={country} />
     </div>
   );
 }

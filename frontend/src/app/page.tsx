@@ -15,16 +15,16 @@ export default async function HomePage() {
   const countries = await fetchCountries();
 
   return (
-    <div className="container mx-auto p-6 ">
-      <h1 className="text-3xl font-bold text-center mb-6">
+    <div className="container mx-auto p-6">
+      <h1 className="text-4xl font-semibold text-center mb-8 text-white">
         Available Countries
       </h1>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {countries.map((country: { countryCode: string; name: string }) => (
           <Link
             key={country.countryCode}
             href={`/country/${country.countryCode}`}
-            className="text-lg text-center text-blue-400 hover:underline hover:text-blue-600 transition-colors"
+            className="block p-4 border border-gray-300 rounded-lg text-lg text-center text-white hover:bg-blue-100 hover:text-blue-600 transition-all duration-200"
           >
             {country.name}
           </Link>
