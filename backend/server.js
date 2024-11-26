@@ -28,42 +28,41 @@ app.get("/api/countries/:countryCode", async (req, res) => {
   const countryCode = req.params.countryCode;
 
   try {
-    // Fetch border countries
+    // Country Name and Borders
     const countryInfo = await axios.get(`${API}/CountryInfo/${countryCode}`);
     const country = countryInfo.data.commonName;
     const borders = countryInfo.data.borders || [];
 
-    // Fetch population data
-    const populationResponse = await axios.get(`${API2}/countries/population`);
+    // Population Data
+    const populationResponse = await retryRequest(() =>
+      axios.get(`${API2}/countries/population`)
+    );
     const populationData = populationResponse.data.data || [];
 
-    // Find population data for the requested country
     const populationDataForCountry = populationData.find(
       (data) => data.country.toLowerCase() === country.toLowerCase()
     );
 
+    const filteredPopulationCounts = populationDataForCountry
+      ? populationDataForCountry.populationCounts
+      : null;
+
     if (!populationDataForCountry) {
-      throw new Error(`Population data for country ${country} not found.`);
+      console.warn(`Population data for country ${country} not found.`);
     }
 
-    const filteredPopulationCounts = populationDataForCountry.populationCounts;
-
-    // Fetch flag data
-    const flagResponse = await axios.get(`${API2}/countries/flag/images`);
+    // Flag URL
+    const flagResponse = await retryRequest(() =>
+      axios.get(`${API2}/countries/flag/images`)
+    );
     const flagDataAll = flagResponse.data.data || [];
 
-    // Find the flag for the requested countryCode
     const flagData = flagDataAll.find(
       (country) => country.iso2 === countryCode
     );
 
-    if (!flagData) {
-      throw new Error(`Flag data for country code ${countryCode} not found.`);
-    }
+    const flagUrl = flagData ? flagData.flag : null;
 
-    const flagUrl = flagData.flag;
-
-    // Return the consolidated data
     res.json({
       country,
       borders,
@@ -72,9 +71,29 @@ app.get("/api/countries/:countryCode", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching country data:", error);
-    res.status(500).json({ error: "Failed to fetch country data" });
+
+    if (error.response && error.response.status === 429) {
+      return res.status(429).send("Too many requests");
+    }
+
+    res.status(500).send("Error fetching country data");
   }
 });
+
+async function retryRequest(requestFn, retries = 3, delay = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      if (i === retries - 1 || error.response?.status !== 429) {
+        throw error;
+      }
+      await new Promise((resolve) =>
+        setTimeout(resolve, delay * Math.pow(2, i))
+      );
+    }
+  }
+}
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

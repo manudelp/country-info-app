@@ -30,7 +30,6 @@ export default function CountryInfoPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Unwrap the `params` and set the `countryCode`
   useEffect(() => {
     async function unwrapParams() {
       const unwrappedParams = await params;
@@ -44,11 +43,10 @@ export default function CountryInfoPage({
     unwrapParams();
   }, [params]);
 
-  // Fetch country data when `countryCode` changes
   useEffect(() => {
     async function fetchCountryData() {
       if (!countryCode) return;
-      setLoading(true); // Set loading to true when fetching starts
+      setLoading(true);
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/countries/${countryCode}`
@@ -91,7 +89,7 @@ export default function CountryInfoPage({
       <div className="flex justify-center mb-4">
         <Image
           priority
-          src={flagUrl || "/flag-placeholder.svg"}
+          src={flagUrl || "/placeholder.png"}
           alt={`${country} flag`}
           className="w-24 h-auto sm:w-32 md:w-56"
           width={128}

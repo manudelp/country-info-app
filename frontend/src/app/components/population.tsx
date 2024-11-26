@@ -30,11 +30,11 @@ interface PopulationProps {
 
 const Population: React.FC<PopulationProps> = ({ populationData, country }) => {
   const chartData: ChartData<"line"> = {
-    labels: populationData.map((data) => data.year),
+    labels: populationData?.map((data) => data.year),
     datasets: [
       {
         label: "Population",
-        data: populationData.map((data) => data.value), // Use 'value' here
+        data: populationData?.map((data) => data.value),
         borderColor: "rgba(75, 192, 192, 1)",
         backgroundColor: "rgba(75, 192, 192, 0.2)",
         tension: 0.4,
@@ -59,7 +59,7 @@ const Population: React.FC<PopulationProps> = ({ populationData, country }) => {
       <h2 className="text-xl md:text-2xl font-semibold border-b-2 border-gray-300 pb-2 mb-4">
         Population Chart
       </h2>
-      {populationData.length > 0 ? (
+      {populationData ? (
         <div className="bg-white p-4 rounded-lg mt-4">
           <Line data={chartData} options={chartOptions} />
         </div>
